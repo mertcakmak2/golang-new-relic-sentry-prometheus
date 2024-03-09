@@ -16,13 +16,13 @@ func main() {
 	// Sentry Config
 	config.SentryConfig()
 	// New Relic Config
-	app := config.NewRelicConfig()
+	newRelicConfig := config.NewRelicConfig()
 	// Zap Config
 	logger = config.ZapConfig()
 
 	router := gin.Default()
 
-	router.Use(nrgin.Middleware(app))
+	router.Use(nrgin.Middleware(newRelicConfig))
 	router.Use(sentrygin.New(sentrygin.Options{Repanic: true}))
 	router.Use(func(ctx *gin.Context) {
 		if hub := sentrygin.GetHubFromContext(ctx); hub != nil {

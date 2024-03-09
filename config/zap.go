@@ -10,6 +10,7 @@ import (
 func ZapConfig() *zap.Logger {
 	core := zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()), zapcore.AddSync(os.Stdout), zap.InfoLevel)
 
+	// app: that global variable named app in new_relic.go file
 	backgroundCore, err := nrzap.WrapBackgroundCore(core, app)
 	if err != nil && err != nrzap.ErrNilApp {
 		panic(err)
