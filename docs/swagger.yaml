@@ -1,0 +1,126 @@
+basePath: /
+definitions:
+  domain.AppError:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  domain.User:
+    properties:
+      age:
+        type: integer
+      created_date:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Go HTTP server with Gin framework.
+  title: Go Monitoring App
+  version: "1.0"
+paths:
+  /api/v1/users:
+    post:
+      consumes:
+      - application/json
+      description: Create User.
+      parameters:
+      - description: User to be created
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Returns created user
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Returns error
+          schema:
+            $ref: '#/definitions/domain.AppError'
+      summary: Create User
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update User.
+      parameters:
+      - description: User to be updated
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Returns updated user
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Returns error
+          schema:
+            $ref: '#/definitions/domain.AppError'
+      summary: Update User
+      tags:
+      - users
+  /api/v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user using their ID from the database.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Returns error
+          schema:
+            $ref: '#/definitions/domain.AppError'
+      summary: Delete a user by ID
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a user using their ID from the database.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns user
+          schema:
+            $ref: '#/definitions/domain.User'
+        "404":
+          description: Returns error
+          schema:
+            $ref: '#/definitions/domain.AppError'
+      summary: Get a user by ID
+      tags:
+      - users
+swagger: "2.0"
