@@ -248,6 +248,6 @@ func Test_Should_Return_Unexpected_Err_When_Invoke_Delete_User_With_MockUserUseC
 	err := json.Unmarshal([]byte(w.Body.String()), &resErr)
 
 	assert.Nil(t, err)
-	assert.Equal(t, 400, w.Code)
+	assert.Equal(t, 500, w.Code)
 	assert.Equal(t, expectedErr.Message, resErr.Message)
 }
