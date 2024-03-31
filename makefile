@@ -5,6 +5,7 @@ api-docs:
 	swag init
 
 unit-test:
+	go clean -cache
 	go test -v ./...
 
 build:
