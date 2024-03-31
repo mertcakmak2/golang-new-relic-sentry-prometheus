@@ -6,13 +6,10 @@ import (
 	"os"
 )
 
-var app *newrelic.Application
-
 func NewRelicConfig() *newrelic.Application {
-	var err error
-	app, err = newrelic.NewApplication(
-		newrelic.ConfigAppName("go-strapi-app"),
-		newrelic.ConfigLicense("<NEW_RELIC_LICENSE_KEY>"),
+	app, err := newrelic.NewApplication(
+		newrelic.ConfigAppName(config().NewRelic.AppName),
+		newrelic.ConfigLicense(config().NewRelic.License),
 		newrelic.ConfigCodeLevelMetricsEnabled(true),
 		newrelic.ConfigAppLogForwardingEnabled(true),
 	)

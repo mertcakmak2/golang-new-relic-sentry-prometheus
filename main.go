@@ -1,54 +1,56 @@
 package main
 
 import (
-	"errors"
-	"github.com/getsentry/sentry-go"
-	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
-	"github.com/newrelic/go-agent/v3/integrations/nrgin"
+	"github.com/newrelic/go-agent/v3/newrelic"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go-app/config"
-	"go.uber.org/zap"
+	"go-app/database"
+	"go-app/middleware"
+	"go-app/user"
 )
 
-var logger *zap.Logger
+var logger = config.ZapTestConfig()
 
 func main() {
-	// Sentry Config
+
+	// Postgres Config & Migration
+	db := config.ConnectPostgres()
+	database.Migrate(db)
+	defer func() {
+		dbInstance, _ := db.DB()
+		_ = dbInstance.Close()
+	}()
+
+	// Sentry Config, New Relic Config & Zap Config
 	config.SentryConfig()
-	// New Relic Config
 	newRelicConfig := config.NewRelicConfig()
-	// Zap Config
-	logger = config.ZapConfig()
+	logger = config.ZapConfig(newRelicConfig)
 
-	router := gin.Default()
+	// User Repository, User UseCase & User Handler
+	userRepo := user.NewUserRepository(db)
+	userUseCase := user.NewUserUseCase(userRepo, logger)
+	userHandler := user.NewUserHandler(userUseCase, logger)
 
-	router.Use(nrgin.Middleware(newRelicConfig))
-	router.Use(sentrygin.New(sentrygin.Options{Repanic: true}))
-	router.Use(func(ctx *gin.Context) {
-		if hub := sentrygin.GetHubFromContext(ctx); hub != nil {
-			hub.Scope().SetTag("someRandomTag", "maybeYouNeedIt")
-			hub.Scope().SetTag("requestId", "123-asdf")
-		}
-		ctx.Next()
-	})
-
-	v1 := router.Group("/v1")
-	v1.GET("/login", v1login)
-
-	router.Run(":8000")
+	// Setup Router
+	router := setupRouter(newRelicConfig, userHandler)
+	router.Run(":8080")
 }
 
-func v1login(c *gin.Context) {
-	err := errors.New("failure exception")
-	if hub := sentrygin.GetHubFromContext(c); hub != nil {
-		hub.WithScope(func(scope *sentry.Scope) {
-			scope.SetExtra("unwantedQuery", "someQueryDataMaybe")
-			hub.CaptureMessage("User provided unwanted query string, but we recovered just fine")
-			hub.CaptureException(err)
-		})
-	}
-	logger.Info("v1 login request received", zap.String("test", "test"))
+func setupRouter(newRelicConfig *newrelic.Application, handler *user.Handler) *gin.Engine {
+	router := gin.Default()
 
-	logger.Error(err.Error(), zap.Error(err))
-	c.Writer.WriteString("v1 login")
+	// Middlewares
+	_middleware := middleware.NewMiddleware(newRelicConfig, logger)
+	router.Use(_middleware.NewRelicMiddleWare())
+	router.Use(_middleware.SentryMiddleware())
+	router.Use(_middleware.LogMiddleware)
+
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	v1 := router.Group("/api/v1/users")
+	v1.POST("", handler.CreateUser)
+	v1.GET("/:id", handler.GetUserById)
+	v1.PUT("", handler.UpdateUser)
+	v1.DELETE("/:id", handler.DeleteUserById)
+	return router
 }

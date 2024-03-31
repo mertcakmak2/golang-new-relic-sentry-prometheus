@@ -8,7 +8,7 @@ import (
 
 func SentryConfig() {
 	if err := sentry.Init(sentry.ClientOptions{
-		Dsn:              "<SENTRY_URL>",
+		Dsn:              config().Sentry.Dsn,
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
 	}); err != nil {
