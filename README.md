@@ -13,3 +13,7 @@ go tool cover -html coverage.out
 ### Generate Mock Files
 
 go generate ./...
+
+### Medium Link
+
+https://medium.com/@mertcakmak2/monitoring-the-golang-app-with-prometheus-grafana-new-relic-and-sentry-fce1ca6980b5
