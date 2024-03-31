@@ -22,3 +22,13 @@ jobs:
 
     - name: Run Unit Test
       run: make unit-test
+
+    - name: Build & Push Docker image
+      uses: mr-smithers-excellent/docker-build-push@v5
+      with:
+        image: mertcakmak2/go-e2e
+        tags: ${SHORT_SHA}
+        registry: docker.io
+        dockerfile: Dockerfile
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
