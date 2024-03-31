@@ -52,9 +52,9 @@ func setupRouter(newRelicConfig *newrelic.Application, handler *user.Handler) *g
 	// Swagger => http://localhost:8080/swagger/index.html
 	docs.SwaggerInfo.BasePath = "/"
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	ginSwagger.WrapHandler(swaggerFiles.Handler,
-		ginSwagger.URL("http://localhost:8080/swagger/doc.json"),
-		ginSwagger.DefaultModelsExpandDepth(-1))
+	//ginSwagger.WrapHandler(swaggerFiles.Handler,
+	//ginSwagger.URL("http://localhost:8080/swagger/doc.json"),
+	//ginSwagger.DefaultModelsExpandDepth(-1))
 
 	// Middlewares
 	_middleware := middleware.NewMiddleware(newRelicConfig, logger)
