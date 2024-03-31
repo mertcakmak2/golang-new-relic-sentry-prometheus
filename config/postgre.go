@@ -24,6 +24,19 @@ func ConnectPostgres() *gorm.DB {
 	return postgresDb
 }
 
+func ConnectTestPostgres(connStr string) *gorm.DB {
+	var postgresDb *gorm.DB
+	once.Do(func() {
+		var err error
+		postgresDb, err = gorm.Open(postgres.Open(connStr), &gorm.Config{})
+		if err != nil {
+			log.Fatalln(err)
+		}
+		log.Println("Creating single postgres db instance now.")
+	})
+	return postgresDb
+}
+
 func getConnectionString() string {
 	host := config().Database.Host
 	user := config().Database.Username
