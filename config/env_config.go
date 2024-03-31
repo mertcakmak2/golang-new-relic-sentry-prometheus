@@ -39,7 +39,7 @@ type Database struct {
 
 type NewRelic struct {
 	AppName string `env:"APP_NAME, default=go-app"`
-	License string `env:"NEW_RELIC_LICENSE"`
+	License string `env:"NEW_RELIC_LICENSE, default=eu01xx489166739db843beeeb65452b2CCCCNRAL"`
 }
 
 type Sentry struct {
