@@ -19,7 +19,6 @@ var logger = config.ZapTestConfig()
 // @version         1.0
 // @description     Go HTTP server with Gin framework.
 
-// @host      localhost:8080
 // @BasePath  /
 func main() {
 
