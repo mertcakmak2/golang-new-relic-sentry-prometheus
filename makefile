@@ -1,9 +1,12 @@
-hello:
-	echo "Hello"
+# generates mock services
+mock:
+	go generate ./...
 
+# generates swagger api docs
 api-docs:
 	swag init
 
+# runs tests
 unit-test:
 	go clean -cache
 	go test -v ./...

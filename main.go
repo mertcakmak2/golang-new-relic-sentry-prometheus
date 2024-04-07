@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -11,6 +14,11 @@ import (
 	"go-app/docs"
 	"go-app/middleware"
 	"go-app/user"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 var logger = config.ZapTestConfig()
@@ -26,6 +34,7 @@ func main() {
 	db := config.ConnectPostgres()
 	database.Migrate(db)
 	defer func() {
+		logger.Info("DB connection closing...")
 		dbInstance, _ := db.DB()
 		_ = dbInstance.Close()
 	}()
@@ -42,7 +51,32 @@ func main() {
 
 	// Setup Router
 	router := setupRouter(newRelicConfig, userHandler)
-	router.Run(":8080")
+
+	srv := &http.Server{Addr: ":8080", Handler: router}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Fatal(fmt.Sprintf("listen: %s\n", err))
+		}
+	}()
+
+	quit := make(chan os.Signal)
+
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	logger.Info("Shutdown Server ...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Fatal(fmt.Sprintf("Server Shutdown: %s\n", err))
+	}
+
+	select {
+	case <-ctx.Done():
+		logger.Info("timeout of 5 seconds.")
+	}
+	logger.Info("Server exiting")
 }
 
 func setupRouter(newRelicConfig *newrelic.Application, handler *user.Handler) *gin.Engine {
@@ -51,9 +85,6 @@ func setupRouter(newRelicConfig *newrelic.Application, handler *user.Handler) *g
 	// Swagger => http://localhost:8080/swagger/index.html
 	docs.SwaggerInfo.BasePath = "/"
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	//ginSwagger.WrapHandler(swaggerFiles.Handler,
-	//ginSwagger.URL("http://localhost:8080/swagger/doc.json"),
-	//ginSwagger.DefaultModelsExpandDepth(-1))
 
 	// Middlewares
 	_middleware := middleware.NewMiddleware(newRelicConfig, logger)
