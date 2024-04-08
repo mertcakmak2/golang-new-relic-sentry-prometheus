@@ -23,18 +23,18 @@ jobs:
     - name: Run Unit Test
       run: make unit-test
 
-    - name: Set Commit SHA as variable
-      run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
-
-    - name: Build & Push Docker image
-      uses: mr-smithers-excellent/docker-build-push@v5
-      with:
-        image: mertcakmak2/go-e2e
-        tags: ${SHORT_SHA}
-        registry: docker.io
-        dockerfile: Dockerfile
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+#    - name: Set Commit SHA as variable
+#      run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+#
+#    - name: Build & Push Docker image
+#      uses: mr-smithers-excellent/docker-build-push@v5
+#      with:
+#        image: mertcakmak2/go-e2e
+#        tags: ${SHORT_SHA}
+#        registry: docker.io
+#        dockerfile: Dockerfile
+#        username: ${{ secrets.DOCKER_USERNAME }}
+#        password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
