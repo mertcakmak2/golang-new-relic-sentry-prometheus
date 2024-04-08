@@ -54,5 +54,6 @@ jobs:
         ECR_REPOSITORY: test-go-app
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        IMAGE_TAG_SHORT=${IMAGE_TAG:0:8}
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:IMAGE_TAG_SHORT .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:IMAGE_TAG_SHORT
